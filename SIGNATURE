@@ -1,0 +1,35 @@
+This file contains message digests of all files listed in MANIFEST,
+signed via the Module::Signature module, version 0.61.
+
+To verify the content in this distribution, first make sure you have
+Module::Signature installed, then type:
+
+    % cpansign -v
+
+It will check each file's integrity, as well as the signature's
+validity.  If "==> Signature verified OK! <==" is not displayed,
+the distribution may already have been compromised, and you should
+not run its Makefile.PL or Build.PL.
+
+-----BEGIN PGP SIGNED MESSAGE-----
+Hash: SHA1
+
+SHA1 eeea3455c8ae0efecc06246aeb0958b4777053b9 AUTHORS
+SHA1 4839e1b8fdf10c53bfb9a9f378d8d5fd8970e4f4 Build.PL
+SHA1 2211221bab9ba391169107b344abb56a965cbe75 Changes
+SHA1 dde3a398b0030463ce2ec45ea98e2747853122bb MANIFEST
+SHA1 6bec347e8c5b2f364c6a22b120efe7aa9a6143ae MANIFEST.SKIP
+SHA1 4705e70767bcfe1d1ed50af73067116ff1509c6b META.yml
+SHA1 7e02528cbdf9c52eecb8d23bd710ab6e2b52a9e0 README
+SHA1 186049396ca25e8d8462790b8d0a9175594829bc lib/PostScript/Barcode.pm
+SHA1 281a583405aa3a2df8405834f5d63152fe08362c lib/PostScript/Barcode/qrcode.pm
+SHA1 da88eb982cb3217d8f56a9f74343edb638cd753e t/00-load.t
+SHA1 cbd24a07795c5f48d9426cd07f1a491672feb8ef t/10-exception.t
+SHA1 0e9b97d29afb01110e076f5a049c72710f9a16f5 t/10-interface.t
+-----BEGIN PGP SIGNATURE-----
+Version: GnuPG v2.0.12 (GNU/Linux)
+
+iEYEARECAAYFAksdYF4ACgkQFtlTdOX00HphIgCfcG9D4j/lPRdL5o9VscgtSmAI
+bV4An1L9hIjgB+tpGoPkFGLbwf/JKC/D
+=8avG
+-----END PGP SIGNATURE-----

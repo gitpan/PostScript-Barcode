@@ -1,0 +1,35 @@
+---
+abstract: 'barcode writer'
+author:
+  - 'Lars Dɪᴇᴄᴋᴏᴡ C<< <daxim@cpan.org> >>'
+build_requires:
+  Capture::Tiny: 0
+  Image::Size: 0
+  Test::Exception: 0
+  Test::More: 0
+configure_requires:
+  Module::Build: 0.35
+  perl: 5.010
+generated_by: 'Module::Build version 0.351'
+license: perl
+meta-spec:
+  url: http://module-build.sourceforge.net/META-spec-v1.4.html
+  version: 1.4
+name: PostScript-Barcode
+provides:
+  PostScript::Barcode:
+    file: lib/PostScript/Barcode.pm
+    version: 0.001
+  PostScript::Barcode::qrcode:
+    file: lib/PostScript/Barcode/qrcode.pm
+    version: 0.001
+requires:
+  Alien::BWIPP: 0.001
+  GSAPI: 0.5
+  Moose: 0.93
+  perl: 5.010
+resources:
+  bugtracker: http://github.com/daxim/PostScript-Barcode/issues
+  license: http://dev.perl.org/licenses/
+  repository: http://github.com/daxim/PostScript-Barcode
+version: 0.001
