@@ -2,12 +2,15 @@ AUTHORS
 Build.PL
 Changes
 lib/PostScript/Barcode.pm
+lib/PostScript/Barcode/azteccode.pm
+lib/PostScript/Barcode/datamatrix.pm
 lib/PostScript/Barcode/qrcode.pm
+lib/PostScript/Barcode/Types.pm
 MANIFEST			This list of files
 MANIFEST.SKIP
+META.yml
 README
 t/00-load.t
 t/10-exception.t
 t/10-interface.t
-META.yml
 SIGNATURE    Added here by Module::Build

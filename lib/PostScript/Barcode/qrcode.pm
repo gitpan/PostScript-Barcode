@@ -4,34 +4,17 @@ use utf8;
 use strict;
 use warnings FATAL => 'all';
 use Moose qw(with has);
-use Moose::Util::TypeConstraints qw(enum);
+use PostScript::Barcode::Types qw();
 
 with qw(PostScript::Barcode);
 
-our $VERSION = '0.001';
+our $VERSION = '0.002';
 
-enum 'Enum_qrcode_eclevel' => qw(L M Q H);
-enum 'Enum_qrcode_version' => (qw(M1 M2 M3 M4), 1..40);
-enum 'Enum_qrcode_format' => qw(full micro);
-
-has 'parse'   => (is => 'rw', isa => 'Bool',);
-has 'eclevel' => (is => 'rw', isa => 'Enum_qrcode_eclevel',);
-has 'version' => (is => 'rw', isa => 'Enum_qrcode_version',);
-has 'format'  => (is => 'rw', isa => 'Enum_qrcode_format',);
-has 'raw'     => (is => 'rw', isa => 'Bool',);
-
-sub post_script_source_appendix {
-    my ($self) = @_;
-    return sprintf "gsave %s %s %u %u moveto %s (%s) qrcode grestore showpage\n",
-        ($self->translate ? "@{$self->translate} translate" : q{}),
-        ($self->scale ? "@{$self->scale} scale" : q{}),
-        @{$self->move_to},
-        ($self->pack_data ? '<' . unpack('H*', $self->data) . '>' : '(' . $self->data . ')'),
-        (
-            (join q{}, map {"$_ "} grep {$self->$_} qw(parse raw))
-          . (join q{ }, map {$_ . '=' . $self->$_} grep {$self->$_} qw(eclevel version format))
-        );
-}
+has 'parse'   => (is => 'rw', isa => 'PostScript::Barcode::Types::Bool',);
+has 'eclevel' => (is => 'rw', isa => 'PostScript::Barcode::Types::Enum::qrcode::eclevel',);
+has 'version' => (is => 'rw', isa => 'PostScript::Barcode::Types::Enum::qrcode::version',);
+has 'format'  => (is => 'rw', isa => 'PostScript::Barcode::Types::Enum::qrcode::format',);
+has 'raw'     => (is => 'rw', isa => 'PostScript::Barcode::Types::Bool',);
 
 sub BUILD {
     my ($self) = @_;
@@ -72,7 +55,7 @@ PostScript::Barcode::qrcode - QR code
 
 =head1 VERSION
 
-This document describes C<PostScript::Barcode::qrcode> version C<0.001>.
+This document describes C<PostScript::Barcode::qrcode> version C<0.002>.
 
 
 =head1 SYNOPSIS
@@ -100,9 +83,15 @@ Type C<Bool>
 
 =head3 C<eclevel>
 
+Type C<PostScript::Barcode::Types::Enum::qrcode::eclevel>
+
 =head3 C<version>
 
+Type C<PostScript::Barcode::Types::Enum::qrcode::version>
+
 =head3 C<format>
+
+Type C<PostScript::Barcode::Types::Enum::qrcode::format>
 
 =head3 C<raw>
 
