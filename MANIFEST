@@ -13,4 +13,6 @@ README
 t/00-load.t
 t/10-exception.t
 t/10-interface.t
+t/20-bug-empty-data-string.t
+t/20-bug-multiple-constructor.t
 SIGNATURE    Added here by Module::Build

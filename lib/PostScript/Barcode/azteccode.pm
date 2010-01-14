@@ -8,7 +8,7 @@ use PostScript::Barcode::Types qw();
 
 with qw(PostScript::Barcode);
 
-our $VERSION = '0.002';
+our $VERSION = '0.003';
 
 has 'parse'      => (is => 'rw', isa => 'PostScript::Barcode::Types::Bool',);
 has 'eclevel'    => (is => 'rw', isa => 'PostScript::Barcode::Types::Num',);
@@ -21,7 +21,7 @@ has 'raw'        => (is => 'rw', isa => 'PostScript::Barcode::Types::Bool',);
 sub BUILD {
     my ($self) = @_;
     my %metrics = (
-        1    => 30,
+        0    => 30,
         7    => 38,
         20   => 46,
         34   => 54,
@@ -57,7 +57,7 @@ sub BUILD {
     );
 
     unless ($self->bounding_box) {
-        my $size;
+        my $size = $metrics{0};
         my @order = sort {$a <=> $b} keys %metrics;
         for my $data_length (@order) {
             last if $data_length > length $self->data;
@@ -86,7 +86,7 @@ PostScript::Barcode::azteccode - Aztec Code
 
 =head1 VERSION
 
-This document describes C<PostScript::Barcode::azteccode> version C<0.002>.
+This document describes C<PostScript::Barcode::azteccode> version C<0.003>.
 
 
 =head1 SYNOPSIS
