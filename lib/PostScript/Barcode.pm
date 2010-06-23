@@ -4,23 +4,27 @@ use utf8;
 use strict;
 use warnings FATAL => 'all';
 use Alien::BWIPP;
-use Devel::Refcount qw();
+use Capture::Tiny qw(capture);
+use List::Util qw(first);
+use PostScript::Barcode::GSAPI::Singleton qw();
 use Moose::Role qw(requires has);
-use GSAPI qw();
 
-our $VERSION = '0.003';
+our $VERSION = '0.004';
 
-my $singleton_gsapi_instance = GSAPI::new_instance;
-has '_gsapi_instance' => (is => 'ro', isa => 'Ref', default => sub {return \$singleton_gsapi_instance;},);
+has '_gsapi_instance' => (
+    is      => 'ro',
+    isa     => 'PostScript::Barcode::GSAPI::Singleton',
+    default => sub {return PostScript::Barcode::GSAPI::Singleton->instance;},
+);
 
 has 'data'      => (is => 'rw', isa => 'Str',           required => 1,);
 has 'pack_data' => (is => 'rw', isa => 'Bool',          default  => 1,);
-has 'move_to'   => (is => 'rw', isa => 'ArrayRef[Num]', default  => sub {return [0, 0];},);
-has 'translate' => (is => 'rw', isa => 'ArrayRef[Num]',);
-has 'scale'     => (is => 'rw', isa => 'ArrayRef[Num]',);
+has 'move_to'   => (is => 'rw', isa => 'PostScript::Barcode::Meta::Types::Tuple', default  => sub {return [0, 0];},);
+has 'translate' => (is => 'rw', isa => 'PostScript::Barcode::Meta::Types::Tuple',);
+has 'scale'     => (is => 'rw', isa => 'PostScript::Barcode::Meta::Types::Tuple',);
 
 has '_post_script_source_bounding_box' => (is => 'rw', isa => 'Str',       lazy_build => 1,);
-has 'bounding_box'                     => (is => 'rw', isa => 'ArrayRef[Num]',);
+has 'bounding_box'                     => (is => 'rw', isa => 'PostScript::Barcode::Meta::Types::TuplePair',);
 has '_post_script_source_header'       => (is => 'rw', isa => 'Str',       lazy_build => 1,);
 has '_short_package_name'              => (is => 'ro', isa => 'Str',       lazy_build => 1,);
 has '_alien_bwipp_class'               => (is => 'ro', isa => 'ClassName', lazy_build => 1,);
@@ -32,7 +36,21 @@ sub _build__post_script_source_header {
 
 sub _build__post_script_source_bounding_box {
     my ($self) = @_;
-    return "%%BoundingBox: @{$self->bounding_box}\n";
+    if ($self->bounding_box) {
+        return sprintf "%%%%BoundingBox: %u %u %u %u\n",
+            $self->bounding_box->[0][0],
+            $self->bounding_box->[0][1],
+            $self->bounding_box->[1][0],
+            $self->bounding_box->[1][1];
+    } else {
+        $self->_post_script_source_bounding_box('');
+        my (undef, $stderr) = capture { $self->render(-sDEVICE => 'bbox', -dEPSCrop => undef); };
+        {
+            my (undef, $x1, $y1, $x2, $y2) = split ' ', $stderr;
+            $self->bounding_box([[$x1, $y1], [$x2, $y2]]);
+        }
+        return $stderr;
+    }
 }
 
 sub _build__short_package_name {
@@ -50,13 +68,13 @@ sub _build__alien_bwipp_class {
 sub _post_script_source_appendix {
     my ($self) = @_;
     my @own_attributes_with_value = grep {
-        $_->type_constraint->name =~ qr/\A PostScript::Barcode::Types/msx && $self ->${\$_->name}
+        $_->definition_context->{'package'} eq $self->meta->name && $_->has_value($self)
     } $self->meta->get_all_attributes;
     my @bool_options = map {$_->name} grep {
-        $_->type_constraint->equals('PostScript::Barcode::Types::Bool')
+        $_->type_constraint->equals('PostScript::Barcode::Meta::Types::Bool')
     } @own_attributes_with_value;
-    my @compound_options = map {$_->name . '=' . $self ->${\$_->name}} grep {
-        !$_->type_constraint->equals('PostScript::Barcode::Types::Bool')
+    my @compound_options = map {$_->name . '=' . $_->get_value($self)} grep {
+        !$_->type_constraint->equals('PostScript::Barcode::Meta::Types::Bool')
     } @own_attributes_with_value;
 
     return sprintf "gsave %s %s %u %u moveto %s (%s) %s grestore showpage\n",
@@ -76,54 +94,114 @@ sub post_script_source_code {
       . $self->_post_script_source_appendix;
 }
 
+sub _atomise_optlist {
+    my ($self, @option_list) = @_;
+    my $option_name = qr/\A -\w/msx;
+    my @atoms;
+    while (@option_list) {
+        my $particle = pop @option_list;
+        # maybe boolean option, maybe option value
+        if (defined && /$option_name/msx) {
+            unshift @atoms, [$particle];
+        } else {
+            my $option_key = pop @option_list;
+            unshift @atoms, [$option_key => $particle];
+        }
+    }
+    return @atoms;
+}
+
 sub gsapi_init_options {
-    my ($self, %params) = @_;
+    my ($self, @params) = @_;
+
+    my $option_is_boolean = 1;
+    my $option_without_equal_sign = qr/\A -g/msx;
 
     my %defaults = (
+        -dBATCH             => \$option_is_boolean,
+        -dEPSCrop           => \$option_is_boolean,
+        -dNOPAUSE           => \$option_is_boolean,
+        -dQUIET             => \$option_is_boolean,
+        -dSAFER             => \$option_is_boolean,
         -dGraphicsAlphaBits => 4,
         -dTextAlphaBits     => 4,
-        -sDEVICE            => 'pngalpha',
         -sOutputFile        => '-',
     );
-    my %boolean_defaults = map {$_ => 1} qw(-dBATCH -dEPSCrop -dNOPAUSE -dQUIET -dSAFER),
-        sprintf('-g%ux%u', $self->bounding_box->[-2], $self->bounding_box->[-1]);
 
-    for my $option (keys %defaults) {
-        $params{$option} = $defaults{$option} unless exists $params{$option};
+    {
+        my $device_name = @{ first(sub {$_->[0] eq '-sDEVICE'}, $self->_atomise_optlist(@params)) // [] }[1];
+        %defaults = (%defaults, -sDEVICE => 'pngalpha') unless $device_name;
+
+        no warnings 'uninitialized';
+        my $factor = {
+            epswrite => 10,
+            pdfwrite => 10,
+            svg      => 1 / 0.24,
+        }->{$device_name} // 1;
+        %defaults = (%defaults,
+            sprintf('-g%ux%u',
+                $factor * ($self->bounding_box->[1][0] - $self->bounding_box->[0][0]),
+                $factor * ($self->bounding_box->[1][1] - $self->bounding_box->[0][1])
+            ) => \$option_is_boolean
+        ) if $self->bounding_box;
     }
 
-    my @gsapi_init_options;
-
-    for my $option (keys %boolean_defaults) {
-        unless (exists $params{$option} && !defined $params{$option}) {
-            push @gsapi_init_options, $option;
+    # overwrite defaults with user supplied optlist
+    for my $atom ($self->_atomise_optlist(@params)) {
+        if (exists $defaults{$atom->[0]}) {
+            if (2 == @{ $atom }) {
+                if (defined $atom->[1]) {
+                    $defaults{$atom->[0]} = $atom->[1];
+                } else {
+                    $defaults{$atom->[0]} = undef; # option to be dropped
+                }
+            }
+        } elsif ($atom->[0] =~ /$option_without_equal_sign/msx) {
+            delete @defaults{grep {/$option_without_equal_sign/msx} keys %defaults};
+            if (2 == @{ $atom }) {
+                if (defined $atom->[1]) {
+                    $defaults{$atom->[0] . $atom->[1]} = \$option_is_boolean;
+                }
+            } else {
+                $defaults{$atom->[0]} = \$option_is_boolean;
+            }
+        } else {
+            if (2 == @{ $atom }) {
+                $defaults{$atom->[0]} = $atom->[1];
+            } else {
+                $defaults{$atom->[0]} = \$option_is_boolean;
+            }
         }
     }
 
-    for my $option (keys %params) {
-        push @gsapi_init_options, $option . '=' . $params{$option};
+    my @gsapi_init_options;
+    for my $optname (keys %defaults) {
+        if (ref $defaults{$optname} && $option_is_boolean == ${ $defaults{$optname} }) {
+            push @gsapi_init_options, $optname;
+        } else {
+            if (defined $defaults{$optname}) {
+                push @gsapi_init_options, "$optname=$defaults{$optname}";
+            }
+        }
     }
-
     return @gsapi_init_options;
 }
 
 sub render {
-    my ($self, %params) = @_;
+    my ($self, @params) = @_;
+
+    $self->post_script_source_code;
+    # Force building the dependent attributes now if they have not been built
+    # yet. This is necessary because L</post_script_source_code> is used below,
+    # after the initialisation of the GSAPI singleton. If this calls L</render>
+    # again, C<libgs> is in an invalid state and crashes.
 
     GSAPI::init_with_args(
-        ${$self->_gsapi_instance}, $self->meta->name, $self->gsapi_init_options(%params),
+        $self->_gsapi_instance->handle, $self->meta->name, $self->gsapi_init_options(@params),
     );
 
-    GSAPI::run_string(${$self->_gsapi_instance}, $self->post_script_source_code);
-    return;
-}
-
-sub DEMOLISH {
-    my ($self) = @_;
-    if (3 == Devel::Refcount::refcount(${$self->_gsapi_instance})) {
-        GSAPI::exit(${$self->_gsapi_instance});
-        GSAPI::delete_instance(${$self->_gsapi_instance});
-    }
+    GSAPI::run_string($self->_gsapi_instance->handle, $self->post_script_source_code);
+    GSAPI::exit($self->_gsapi_instance->handle);
     return;
 }
 
@@ -140,7 +218,7 @@ PostScript::Barcode - barcode writer
 
 =head1 VERSION
 
-This document describes C<PostScript::Barcode> version C<0.003>.
+This document describes C<PostScript::Barcode> version C<0.004>.
 
 
 =head1 SYNOPSIS
@@ -169,20 +247,24 @@ is true.
 
 =head3 C<move_to>
 
-Type C<ArrayRef[Num]>, position where the barcode is placed initially.
-Default is C<[0, 0]>, which is the lower left hand of a document.
+Type C<PostScript::Barcode::Meta::Types::Tuple>, position where the barcode is
+placed initially. Default is C<[0, 0]>, which is the lower left hand of a
+document.
 
 =head3 C<translate>
 
-Type C<ArrayRef[Num]>, vector by which the barcode position is shifted.
+Type C<PostScript::Barcode::Meta::Types::Tuple>, vector by which the barcode
+position is shifted.
 
 =head3 C<scale>
 
-Type C<ArrayRef[Num]>, vector by which the barcode is resized.
+Type C<PostScript::Barcode::Meta::Types::Tuple>, vector by which the barcode is
+resized.
 
 =head3 C<bounding_box>
 
-Type C<ArrayRef[Num]>, coordinates of the EPS document bounding box.
+Type C<PostScript::Barcode::Meta::Types::TuplePair>, coordinates of the EPS
+document bounding box.
 
 =head2 Methods
 
@@ -192,12 +274,47 @@ Returns EPS source code of the barcode as string.
 
 =head3 C<render>
 
-    $barcode->render(-sDEVICE => 'pnggray', -sOutputFile => 'out.png',);
+    $barcode->render;
+      # use defaults, see below
+    $barcode->render(-sDEVICE => 'epswrite');
+    $barcode->render(-sDEVICE => 'pdfwrite');
+    $barcode->render(-sDEVICE => 'svg');
 
-Takes a hash of initialisation options, see L<GSAPI/"init_with_args"> and
-L<http://ghostscript.com/doc/current/Use.htm#Invoking>. Default is
-C<< qw(-dBATCH -dEPSCrop -dNOPAUSE -dQUIET -dSAFER -gI<x>xI<y>
--dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sDEVICE=pngalpha -sOutputFile=-) >>,
+Most of the time the simple examples above are sufficient.
+
+    $barcode->render(-sDEVICE => 'pnggray', -sOutputFile => 'out.png',);
+      # overrides some default values
+    $barcode->render(-dEPSCrop => undef, -g => undef,);
+      # disables some default values
+
+Takes an list of initialisation arguments. The argument names start with a
+dash, see the explanation at L<GSAPI/"init_with_args"> and
+L<http://ghostscript.com/doc/current/Use.htm#Invoking>. Renders and writes
+the barcode image binary data to the specified file name.
+
+=head4 options list atoms
+
+=over
+
+=item
+
+a pair of C<Str> and C<Value> which results in a C<-key=value> option
+
+=item
+
+a pair of C<Str> and C<Undef> which disables a boolean option that
+was enabled by default by this module
+
+=item
+
+a C<Str> which enables a boolean option.
+
+=back
+
+=head4 options defaults
+
+C<qw(-dBATCH -dEPSCrop -dNOPAUSE -dQUIET -dSAFER -g>I<XXX>C<x>I<YYY>
+C<-dGraphicsAlphaBits=4 -dTextAlphaBits=4 -sDEVICE=pngalpha -sOutputFile=-)>,
 meaning the barcode is rendered as transparent PNG with anti-aliasing to
 STDOUT, with the image size automatically taken from the L</"bounding_box">.
 
@@ -228,16 +345,17 @@ Perl 5.10, L<Module::Build>
 
 =head3 core modules
 
-Perl 5.10
+Perl 5.10, L<List::Util>
 
 =head3 CPAN modules
 
-L<Alien::BWIPP>, L<GSAPI>, L<Moose>, L<Moose::Role>, L<Moose::Util::TypeConstraints>
+L<Alien::BWIPP>, L<Capture::Tiny>, L<GSAPI>, L<Moose>, L<Moose::Role>,
+L<Moose::Util::TypeConstraints>, L<MooseX::Singleton>
 
 
 =head1 INCOMPATIBILITIES
 
-None reported.
+After version C<0.003> the type constraint for L</"bounding_box"> changed.
 
 
 =head1 BUGS AND LIMITATIONS
@@ -254,8 +372,6 @@ or send an email to the maintainer.
 =over
 
 =item add classes for the other barcodes
-
-=item rework GSAPI init options passing
 
 =back
 
@@ -275,7 +391,7 @@ See file F<AUTHORS>.
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright © 2009 Lars Dɪᴇᴄᴋᴏᴡ C<< <daxim@cpan.org> >>
+Copyright © 2010 Lars Dɪᴇᴄᴋᴏᴡ C<< <daxim@cpan.org> >>
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl 5.10.0.

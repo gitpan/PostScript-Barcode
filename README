@@ -1,6 +1,6 @@
 =encoding UTF-8
 
-PostScript-Barcode version 0.003 is Copyright © 2009, Lars Dɪᴇᴄᴋᴏᴡ
+PostScript-Barcode version 0.004 is Copyright © 2010, Lars Dɪᴇᴄᴋᴏᴡ
 
 =head1 NAME
 
@@ -41,7 +41,8 @@ Perl 5.10
 
 =head3 CPAN modules
 
-L<Alien::BWIPP>, L<GSAPI>, L<Moose>, L<Moose::Role>, L<Moose::Util::TypeConstraints>
+L<Alien::BWIPP>, L<GSAPI>, L<Moose>, L<Moose::Role>,
+L<Moose::Util::TypeConstraints>, L<MooseX::Singleton>
 
 =head2 Build and test time
 
@@ -54,7 +55,7 @@ L<Capture::Tiny>, L<Image::Size>, L<Test::Exception>, L<Test::More>
 
 =head1 LICENCE AND COPYRIGHT
 
-Copyright © 2009 Lars Dɪᴇᴄᴋᴏᴡ C<< <daxim@cpan.org> >>
+Copyright © 2010 Lars Dɪᴇᴄᴋᴏᴡ C<< <daxim@cpan.org> >>
 
 This library is free software; you can redistribute it and/or modify it
 under the same terms as Perl 5.10.0.

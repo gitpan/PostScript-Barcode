@@ -1,5 +1,5 @@
 This file contains message digests of all files listed in MANIFEST,
-signed via the Module::Signature module, version 0.61.
+signed via the Module::Signature module, version 0.64.
 
 To verify the content in this distribution, first make sure you have
 Module::Signature installed, then type:
@@ -15,26 +15,29 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 ab9536f319e96044fbc6dc4762ca9e78e8b5b2cb AUTHORS
-SHA1 369219f20612038346fec7b3fb2b4264d3cc0203 Build.PL
-SHA1 adc698beaebec972868deaaebe6adb3ca679f6da Changes
-SHA1 b9c0ffdd1c2c382debee60fe39fe015f485bf381 MANIFEST
+SHA1 019a6af09b28d128d8b45ca06824a7831ba56ea1 Build.PL
+SHA1 c3b24f1bda24030d8ad37bd21ed11db11a0231fe Changes
+SHA1 b7f5d0487a16ce97dd1d244a985b92b5524d4658 MANIFEST
 SHA1 6bec347e8c5b2f364c6a22b120efe7aa9a6143ae MANIFEST.SKIP
-SHA1 b6eaa19f44aba779f2df2d3d50926b7b8c820ace META.yml
-SHA1 56254b1832d9d5c6aba585fe6e80a42a8e8ad5e5 README
-SHA1 a2ba12e9efed07b46420e9be854635245b9438ae lib/PostScript/Barcode.pm
-SHA1 994a128217f4c6f6d99a653bfe9ed7ca76fdf099 lib/PostScript/Barcode/Types.pm
-SHA1 6b4b53c196d5250d4fe6c4171427e4c30d569149 lib/PostScript/Barcode/azteccode.pm
-SHA1 ef4c13e27a88b829d8e263819dcb85312e7143ed lib/PostScript/Barcode/datamatrix.pm
-SHA1 a7c108fc47b91409838685c18521b7f209387d71 lib/PostScript/Barcode/qrcode.pm
-SHA1 e256b5a09407cab2ebfc4bf42130cc30d48d22fa t/00-load.t
+SHA1 d7beb32e912e5bf728032ce9916c33a274e1adcb META.yml
+SHA1 d3d6bab5db7bd6ebe5a0b07bffd5562e0bf29266 README
+SHA1 f6f717988bd1047867eee4aa833e6f2c5bd1f0fd lib/PostScript/Barcode.pm
+SHA1 580fa5a044b7654f6f6fa7fc35dcf0a5e5d5f3e1 lib/PostScript/Barcode/GSAPI/Singleton.pm
+SHA1 04d9d656445fe8df1b5facb4b46834a3d9993ba1 lib/PostScript/Barcode/Meta/Types.pm
+SHA1 c18dc62cd544aaf4e780ddaa75f4c4ca01da8efc lib/PostScript/Barcode/azteccode.pm
+SHA1 bfeeb52d896fb11df8858ca406d202b2ec6278f0 lib/PostScript/Barcode/datamatrix.pm
+SHA1 6ab48806543e33fcc37302f9574fdcf05332f0ff lib/PostScript/Barcode/qrcode.pm
+SHA1 c43ff62e34b7f5fb0a6c0c71c7d8ebb34661976b t/00-load.t
 SHA1 cbd24a07795c5f48d9426cd07f1a491672feb8ef t/10-exception.t
-SHA1 5b1efdb1cc39f071e84b5874ad85f45c1c151138 t/10-interface.t
+SHA1 753328028124b23a8bbaa31129880f9982803f2c t/10-interface.t
 SHA1 ae77b9fbe2acbf6101bccdad8dcf818405a1c791 t/20-bug-empty-data-string.t
+SHA1 c0c01ddb650a09ca4ad070f65c5714ab80ae6793 t/20-bug-memleak.t
 SHA1 bd0d7806e2389f3a008d9555b1ccfb008dea4bbb t/20-bug-multiple-constructor.t
+SHA1 3dd2afeae90573ed3d7064418ceae50fe83952e1 t/20-bug-regression1.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.12 (GNU/Linux)
 
-iEYEARECAAYFAktPJoMACgkQFtlTdOX00HpLQQCeJKVDdwwaeA5ugTi6RsJd2NWd
-0vQAnRhM6q5RYgS0OV/3fP7EIDfzXUvV
-=Nex7
+iEYEARECAAYFAkwiKtkACgkQFtlTdOX00Hp1XQCfRFjDvysvjtoh1rHpU1mmVcnD
+f9oAnR5IzpLkVclqapTBLQLaSbIiI/WP
+=8Bvx
 -----END PGP SIGNATURE-----
