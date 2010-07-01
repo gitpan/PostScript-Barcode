@@ -9,7 +9,7 @@ use List::Util qw(first);
 use PostScript::Barcode::GSAPI::Singleton qw();
 use Moose::Role qw(requires has);
 
-our $VERSION = '0.004';
+our $VERSION = '0.005';
 
 has '_gsapi_instance' => (
     is      => 'ro',
@@ -20,8 +20,8 @@ has '_gsapi_instance' => (
 has 'data'      => (is => 'rw', isa => 'Str',           required => 1,);
 has 'pack_data' => (is => 'rw', isa => 'Bool',          default  => 1,);
 has 'move_to'   => (is => 'rw', isa => 'PostScript::Barcode::Meta::Types::Tuple', default  => sub {return [0, 0];},);
-has 'translate' => (is => 'rw', isa => 'PostScript::Barcode::Meta::Types::Tuple',);
-has 'scale'     => (is => 'rw', isa => 'PostScript::Barcode::Meta::Types::Tuple',);
+has 'translate' => (is => 'rw', isa => 'Maybe[PostScript::Barcode::Meta::Types::Tuple]', default  => sub {return;},);
+has 'scale'     => (is => 'rw', isa => 'Maybe[PostScript::Barcode::Meta::Types::Tuple]', default  => sub {return;},);
 
 has '_post_script_source_bounding_box' => (is => 'rw', isa => 'Str',       lazy_build => 1,);
 has 'bounding_box'                     => (is => 'rw', isa => 'PostScript::Barcode::Meta::Types::TuplePair',);
@@ -77,7 +77,7 @@ sub _post_script_source_appendix {
         !$_->type_constraint->equals('PostScript::Barcode::Meta::Types::Bool')
     } @own_attributes_with_value;
 
-    return sprintf "gsave %s %s %u %u moveto %s (%s) %s grestore showpage\n",
+    return sprintf "%s %s %u %u moveto %s (%s) /%s /uk.co.terryburton.bwipp findresource exec showpage\n",
         ($self->translate ? "@{$self->translate} translate" : q{}),
         ($self->scale ? "@{$self->scale} scale" : q{}),
         @{$self->move_to},
@@ -218,7 +218,7 @@ PostScript::Barcode - barcode writer
 
 =head1 VERSION
 
-This document describes C<PostScript::Barcode> version C<0.004>.
+This document describes C<PostScript::Barcode> version C<0.005>.
 
 
 =head1 SYNOPSIS
@@ -229,10 +229,21 @@ This document describes C<PostScript::Barcode> version C<0.004>.
 =head1 DESCRIPTION
 
 By itself alone, this role does nothing useful. Use one of the classes
-residing under this namespace.
+residing under this namespace:
 
+=over
+
+=item L<PostScript::Barcode::azteccode>
+
+=item L<PostScript::Barcode::datamatrix>
+
+=item L<PostScript::Barcode::qrcode>
+
+=back
 
 =head1 INTERFACE
+
+See L<Moose::Manual::Types/"THE TYPES"> about the type names.
 
 =head2 Attributes
 
@@ -253,18 +264,20 @@ document.
 
 =head3 C<translate>
 
-Type C<PostScript::Barcode::Meta::Types::Tuple>, vector by which the barcode
-position is shifted.
+Type C<Maybe[PostScript::Barcode::Meta::Types::Tuple]>, vector by which the
+barcode position is shifted. Default is C<undef>, no position shifting.
 
 =head3 C<scale>
 
-Type C<PostScript::Barcode::Meta::Types::Tuple>, vector by which the barcode is
-resized.
+Type C<Maybe[PostScript::Barcode::Meta::Types::Tuple]>, vector by which the
+barcode is resized. Default is C<undef>, no size scaling.
 
 =head3 C<bounding_box>
 
 Type C<PostScript::Barcode::Meta::Types::TuplePair>, coordinates of the EPS
-document bounding box.
+document bounding box. Default values are automatically determined through the
+Ghostscript C<bbox> device, see
+L<http://ghostscript.com/doc/current/Devices.htm#Bounding_box_output>.
 
 =head2 Methods
 

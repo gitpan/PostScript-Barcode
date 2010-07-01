@@ -15,18 +15,18 @@ not run its Makefile.PL or Build.PL.
 Hash: SHA1
 
 SHA1 ab9536f319e96044fbc6dc4762ca9e78e8b5b2cb AUTHORS
-SHA1 019a6af09b28d128d8b45ca06824a7831ba56ea1 Build.PL
-SHA1 c3b24f1bda24030d8ad37bd21ed11db11a0231fe Changes
+SHA1 c704a92ce2619739209ebb4425611f096a2ea6e1 Build.PL
+SHA1 071c7f0173e6d3216e8fcad720f64c6b978b2802 Changes
 SHA1 b7f5d0487a16ce97dd1d244a985b92b5524d4658 MANIFEST
 SHA1 6bec347e8c5b2f364c6a22b120efe7aa9a6143ae MANIFEST.SKIP
-SHA1 d7beb32e912e5bf728032ce9916c33a274e1adcb META.yml
-SHA1 d3d6bab5db7bd6ebe5a0b07bffd5562e0bf29266 README
-SHA1 f6f717988bd1047867eee4aa833e6f2c5bd1f0fd lib/PostScript/Barcode.pm
-SHA1 580fa5a044b7654f6f6fa7fc35dcf0a5e5d5f3e1 lib/PostScript/Barcode/GSAPI/Singleton.pm
-SHA1 04d9d656445fe8df1b5facb4b46834a3d9993ba1 lib/PostScript/Barcode/Meta/Types.pm
-SHA1 c18dc62cd544aaf4e780ddaa75f4c4ca01da8efc lib/PostScript/Barcode/azteccode.pm
-SHA1 bfeeb52d896fb11df8858ca406d202b2ec6278f0 lib/PostScript/Barcode/datamatrix.pm
-SHA1 6ab48806543e33fcc37302f9574fdcf05332f0ff lib/PostScript/Barcode/qrcode.pm
+SHA1 1670b101b45142e832e306f4217c0ba052a3b818 META.yml
+SHA1 07096aef8e447e21818c9bf17d59a21b2ecd9aa7 README
+SHA1 396c268a05e2b99aac703f2d2c31804a50fbae41 lib/PostScript/Barcode.pm
+SHA1 7642a69d62e0686eb0468c3705d4af96ed7c3c99 lib/PostScript/Barcode/GSAPI/Singleton.pm
+SHA1 30c52c017c7461250e43b8886e32ad206c644486 lib/PostScript/Barcode/Meta/Types.pm
+SHA1 e683cd1b83f08918b533a4c266b0ba83646ff7d8 lib/PostScript/Barcode/azteccode.pm
+SHA1 3a7bf67fab4083d815fff805789a1b21a67d91fe lib/PostScript/Barcode/datamatrix.pm
+SHA1 41853d1ac2a25ce11dc1257b0e0be853cb4c21a8 lib/PostScript/Barcode/qrcode.pm
 SHA1 c43ff62e34b7f5fb0a6c0c71c7d8ebb34661976b t/00-load.t
 SHA1 cbd24a07795c5f48d9426cd07f1a491672feb8ef t/10-exception.t
 SHA1 753328028124b23a8bbaa31129880f9982803f2c t/10-interface.t
@@ -37,7 +37,7 @@ SHA1 3dd2afeae90573ed3d7064418ceae50fe83952e1 t/20-bug-regression1.t
 -----BEGIN PGP SIGNATURE-----
 Version: GnuPG v2.0.12 (GNU/Linux)
 
-iEYEARECAAYFAkwiKtkACgkQFtlTdOX00Hp1XQCfRFjDvysvjtoh1rHpU1mmVcnD
-f9oAnR5IzpLkVclqapTBLQLaSbIiI/WP
-=8Bvx
+iEYEARECAAYFAkwsjfAACgkQFtlTdOX00Hp4FwCfQ6HXHINdK66r2BJ6Y+XwGWt/
+1FcAnjml6amzrgkMySMsuIGmlcA4JerP
+=ptis
 -----END PGP SIGNATURE-----
